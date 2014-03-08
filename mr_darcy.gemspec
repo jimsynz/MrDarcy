@@ -22,4 +22,6 @@ Gem::Specification.new do |spec|
   %w| rake rspec guard guard-rspec guard-bundler terminal-notifier-guard pry-byebug |.each do |gem|
     spec.add_development_dependency gem
   end
+
+  spec.add_dependency 'stateflow'
 end
