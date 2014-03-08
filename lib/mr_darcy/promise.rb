@@ -59,22 +59,30 @@ module MrDarcy
     end
 
     def result
-      value
+      MrDarcy.driver.wait do
+        value
+      end
     end
 
     private
 
     def resolve_deferred_promise
-      deferred_promise && deferred_promise.parent_resolved(value)
+      MrDarcy.driver.dispatch do
+        deferred_promise && deferred_promise.parent_resolved(value)
+      end
     end
 
     def reject_deferred_promise
-      deferred_promise && deferred_promise.parent_rejected(value)
+      MrDarcy.driver.dispatch do
+        deferred_promise && deferred_promise.parent_rejected(value)
+      end
     end
 
     def evaluate_promise(block)
       dsl = MrDarcy::PromiseDSL.new(self)
-      dsl.instance_exec(&block)
+      MrDarcy.driver.dispatch do
+        dsl.instance_exec(&block)
+      end
     end
 
   end
