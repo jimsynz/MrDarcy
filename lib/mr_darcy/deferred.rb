@@ -3,40 +3,46 @@ module MrDarcy
 
     attr_accessor :promise, :resolve_block, :reject_block
 
-    %i| resolved? rejected? unresolved? |.each do |method|
+    %i| then fail resolved? rejected? unresolved? |.each do |method|
       define_method method do |*args|
         promise.public_send(method, *args)
       end
     end
 
-    def initialize resolve: nil, reject: nil
-      self.resolve_block = resolve
-      self.reject_block  = reject
+    def initialize
       self.promise = Promise.new {}
     end
 
-    def parent_resolved _value
-      begin
-        promise.value = resolve_block.call(_value)
-        promise.resolve!
-      # rescue Exception => e
-      #   promise.value = e
-      #   promise.reject!
-      end
+    def parent_resolved value
+      parent_did :resolve, value
     end
 
     def parent_rejected exception
+      parent_did :reject, exception
+    end
+
+    def parent_did event, value
       begin
-        if reject_block
-          promise.value = reject_block.call(exception)
-          promise.resolve!
+        block = public_send("#{event}_block")
+        if block
+          value = block.call(value)
+          if value.respond_to? :then
+            value.then do |v|
+              promise.value = v
+              promise.resolve!
+            end
+          else
+            promise.value = value
+            promise.resolve!
+          end
         else
-          promise.value = exception
-          promise.reject!
+          promise.value = value
+          promise.public_send("#{event}!")
         end
-      # rescue Exception => e
-      #   promise.value = e
-      #   promise.reject!
+
+      rescue Exception => e
+        promise.value = e
+        promise.reject!
       end
     end
   end
