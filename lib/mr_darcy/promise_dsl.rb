@@ -3,8 +3,8 @@ module MrDarcy
 
     attr_accessor :promise
 
-    def initialize(promise)
-      self.promise = promise
+    def initialize(_promise)
+      self.promise = _promise
     end
 
     def resolve(value)

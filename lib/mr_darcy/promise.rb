@@ -1,5 +1,4 @@
-require 'fiber'
-require 'thread'
+require 'pry-byebug'
 require 'stateflow'
 Stateflow.persistence = :none
 
@@ -36,48 +35,46 @@ module MrDarcy
     end
 
     def initialize(block)
-      @thread = Thread.new do
-        begin
-          MrDarcy::PromiseDSL.new(self).instance_exec(&block)
-        rescue Exception => e
-          self.value = e
-          self.reject!
-        end
+      begin
+        evaluate_promise(block)
+      rescue Exception => e
+        puts "Exception #{e.inspect}"
+        self.value = e
+        self.reject!
       end
     end
 
     def then &block
+      self.deferred_promise = Deferred.new
       deferred_promise.resolve_block = block
       deferred_promise.parent_resolved(value) if resolved?
       deferred_promise.promise
     end
 
     def fail &block
+      self.deferred_promise = Deferred.new
       deferred_promise.reject_block = block
       deferred_promise.parent_rejected(value) if rejected?
       deferred_promise.promise
     end
 
     def result
-      @thread.join
       value
     end
 
     private
-    def deferred_promise
-      @deferred_promise ||= Deferred.new
-    end
 
     def resolve_deferred_promise
-      @thread = Thread.new{deferred_promise && deferred_promise.parent_resolved(value)}
+      deferred_promise && deferred_promise.parent_resolved(value)
     end
 
     def reject_deferred_promise
-      @thread = Thread.new{deferred_promise && deferred_promise.parent_rejected(value)}
+      deferred_promise && deferred_promise.parent_rejected(value)
     end
 
     def evaluate_promise(block)
-      MrDarcy::PromiseDSL.new(self).instance_exec(&block)
+      dsl = MrDarcy::PromiseDSL.new(self)
+      dsl.instance_exec(&block)
     end
 
   end
