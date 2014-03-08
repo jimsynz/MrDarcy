@@ -8,13 +8,13 @@ module MrDarcy
     end
 
     def resolve(value)
-      promise.resolve!
       promise.value = value
+      promise.resolve!
     end
 
     def reject(exception)
-      promise.reject!
       promise.value = exception
+      promise.reject!
     end
 
   end
