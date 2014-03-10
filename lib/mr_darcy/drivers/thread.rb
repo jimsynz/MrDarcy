@@ -13,8 +13,9 @@ module MrDarcy
       def wait
         @threads ||= []
         @threads.each do |thread|
-          thread.join unless Thread.current == thread
+          thread.join unless ::Thread.current == thread
         end
+        yield
       end
     end
   end
