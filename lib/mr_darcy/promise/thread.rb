@@ -3,38 +3,33 @@ module MrDarcy
     class Thread < Base
 
       def initialize *args
-        @lock = Mutex.new
-        @lock.lock
+        @wait_lock = Mutex.new
+        @wait_cond = ConditionVariable.new
+        @wait_lock.lock
         super
       end
 
       def result
-        wait_until_not_unresolved
+        wait_if_unresolved
         value
       end
 
       def final
-        wait_until_not_unresolved
+        wait_if_unresolved
         self
       end
 
-      def value=(x)
-        semaphore.synchronize { super }
-      end
-
-      def resolve new_value
+      def resolve value
         semaphore.synchronize do
-          value = super new_value
-          condition.signal
-          value
+          super
+          @wait_cond.signal
         end
       end
 
-      def reject new_value
+      def reject value
         semaphore.synchronize do
-          value = super new_value
-          condition.signal
-          value
+          super
+          @wait_cond.signal
         end
       end
 
@@ -44,12 +39,8 @@ module MrDarcy
         ::Thread.new &block
       end
 
-      def condition
-        @condition ||= ConditionVariable.new
-      end
-
-      def wait_until_not_unresolved
-        condition.wait @lock if unresolved?
+      def wait_if_unresolved
+        @wait_cond.wait @wait_lock if unresolved?
       end
 
       def semaphore

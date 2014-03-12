@@ -1,11 +1,28 @@
 module MrDarcy
   class Context
 
-    attr_accessor :deferred, :driver
+    class << self
+      def role role_name, options={}, &block
+        self.roles[role_name] = Role.new(role_name, options, &block)
+      end
+
+      def action action_name, &block
+        define_method action_name do |*args|
+          self.then do |value|
+            self.instance_exec(*args, &block)
+          end
+          self
+        end
+      end
+
+      def roles
+        @roles ||= {}
+      end
+    end
 
     def initialize role_players={}
-      self.driver  = role_players.delete(:driver) || MrDarcy.driver
-      self.deferred = Deferred.new(driver: driver) {}
+      @driver   = role_players.delete(:driver) || MrDarcy.driver
+      @deferred = Deferred.new(driver: driver) {}
       deferred.resolve nil
 
       roles = self.class.roles
@@ -46,26 +63,9 @@ module MrDarcy
       self
     end
 
-    class << self
+    private
 
-      def role role_name, options={}, &block
-        self.roles[role_name] = Role.new(role_name, options, &block)
-      end
-
-      def action action_name, &block
-        define_method action_name do |*args|
-          self.then do |value|
-            self.instance_exec(*args, &block)
-          end
-          self
-        end
-      end
-
-      def roles
-        @roles ||= {}
-      end
-
-    end
+    attr_accessor :deferred, :driver
 
   end
 end

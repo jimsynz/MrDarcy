@@ -23,6 +23,4 @@ Gem::Specification.new do |spec|
       pry-byebug eventmachine em-http-request celluloid |.each do |gem|
     spec.add_development_dependency gem
   end
-
-  spec.add_dependency 'stateflow'
 end

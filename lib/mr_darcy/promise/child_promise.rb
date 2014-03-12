@@ -6,7 +6,8 @@ module MrDarcy
 
       def parent_resolved value
         begin
-          new_value = result :resolve, value
+          return resolve_with value unless handles_resolve?
+          new_value = result_for :resolve, value
           if thenable? new_value
             defer_resolution_via new_value
           else
@@ -19,11 +20,12 @@ module MrDarcy
 
       def parent_rejected value
         begin
-          new_value = result :reject, value
+          return reject_with value unless handles_reject?
+          new_value = result_for :reject, value
           if thenable? new_value
             defer_resolution_via new_value
           else
-            reject_with new_value
+            resolve_with new_value
           end
         rescue Exception => e
           reject_with e
@@ -32,13 +34,21 @@ module MrDarcy
 
       private
 
-      def result which, value
+      def result_for which, value
         block = public_send("#{which}_block")
         if block
           block.call value
         else
           value
         end
+      end
+
+      def handles_reject?
+        !!reject_block
+      end
+
+      def handles_resolve?
+        !!resolve_block
       end
 
       def thenable? object

@@ -1,42 +1,24 @@
 module MrDarcy
   module Promise
-    class State
-      include Stateflow
+    module State
+      autoload :Base,       File.expand_path('../state/base', __FILE__)
+      autoload :Unresolved, File.expand_path('../state/unresolved', __FILE__)
+      autoload :Resolved,   File.expand_path('../state/resolved', __FILE__)
+      autoload :Rejected,   File.expand_path('../state/rejected', __FILE__)
 
-      attr_accessor :promise
+      module_function
 
-      stateflow do
-        initial :unresolved
-
-        state :unresolved
-
-        state :resolved do
-          after_enter :resolve_child_promise
+      def state stateful
+        case stateful.send :state
+        when :unresolved
+          Unresolved.new stateful
+        when :resolved
+          Resolved.new stateful
+        when :rejected
+          Rejected.new stateful
+        else
+          raise "Unknown state #{stateful.state}"
         end
-
-        state :rejected do
-          after_enter :reject_child_promise
-        end
-
-        event :resolve do
-          transitions from: :unresolved, to: :resolved
-        end
-
-        event :reject do
-          transitions from: :unresolved, to: :rejected
-        end
-      end
-
-      def initialize(promise)
-        self.promise = promise
-      end
-
-      def resolve_child_promise
-        promise.send :resolve_child_promise
-      end
-
-      def reject_child_promise
-        promise.send :reject_child_promise
       end
     end
   end

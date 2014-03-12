@@ -1,6 +1,3 @@
-require 'stateflow'
-Stateflow.persistence = :none
-
 module MrDarcy
   module Promise
     class Base
@@ -13,17 +10,17 @@ module MrDarcy
 
       def then &block
         @child_promise ||= generate_child_promise
-        puts "thenning to #{child_promise}"
         child_promise.resolve_block = block
         resolve_child_promise if resolved?
+        reject_child_promise  if rejected?
         child_promise.promise
       end
 
       def fail &block
         @child_promise ||= generate_child_promise
-        puts "failing to #{child_promise}"
         child_promise.reject_block = block
-        reject_child_promise if rejected?
+        resolve_child_promise if resolved?
+        reject_child_promise  if rejected?
         child_promise.promise
       end
 
@@ -42,35 +39,44 @@ module MrDarcy
 
       %i| resolved? unresolved? rejected? |.each do |method|
         define_method method do |*args|
-          state.public_send method, *args
+          state_machine.public_send(method, *args)
         end
       end
 
       def resolve value
         @value = value
-        state.resolve
+        state_machine.resolve
+        resolve_child_promise
       end
 
       def reject exception
-        @value = value
-        state.reject
+        @value = exception
+        state_machine.reject
+        reject_child_promise
       end
 
       private
 
-      attr_accessor :value, :child_promise
-
+      attr_accessor :value, :child_promise, :state
 
       def state
-        @state ||= State.new(self)
+        @state ||= :unresolved
+      end
+
+      def state_machine
+        State.state(self)
+      end
+
+      def has_child_promise?
+        !!child_promise
       end
 
       def resolve_child_promise
-        puts "resolving #{child_promise}"
-        if child_promise
-          puts "resolving child promise"
+        if has_child_promise?
           if child_promise.unresolved?
-            child_promise.parent_resolved(value)
+            schedule_promise do
+              child_promise.parent_resolved(value)
+            end
           else
             raise "Deferred promise is not unresolved!"
           end
@@ -78,11 +84,11 @@ module MrDarcy
       end
 
       def reject_child_promise
-        puts "rejecting #{child_promise}"
         if child_promise
-          puts "rejecting child promise"
           if child_promise.unresolved?
-            child_promise.parent_rejected(value)
+            schedule_promise do
+              child_promise.parent_rejected(value)
+            end
           else
             raise "Deferred promise is not unresolved!"
           end
@@ -93,12 +99,11 @@ module MrDarcy
         raise "Subclasses must implement me"
       end
 
-      def evaluate_promise
+      def evaluate_promise &block
         begin
-          yield DSL.new(self)
+          block.call DSL.new(self)
         rescue Exception => e
-          self.value = e
-          self.reject
+          self.reject e
         end
       end
 

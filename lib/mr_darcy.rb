@@ -15,4 +15,8 @@ module MrDarcy
   def driver
     @driver ||= :Thread
   end
+
+  def all_drivers
+    %i| synchronous thread celluloid em |
+  end
 end
