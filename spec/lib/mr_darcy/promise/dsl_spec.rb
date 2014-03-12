@@ -25,12 +25,7 @@ describe MrDarcy::Promise::DSL do
     before  { promise.stub :value= => nil, resolve: nil }
 
     it 'resolves the promise' do
-      promise.should_receive :resolve
-      subject
-    end
-
-    it 'stores the value'  do
-      promise.should_receive(:value=).with(:resolved_value)
+      promise.should_receive(:resolve).with(:resolved_value)
       subject
     end
   end
@@ -40,12 +35,7 @@ describe MrDarcy::Promise::DSL do
     before  { promise.stub :value= => nil, reject: nil }
 
     it 'rejects the promise' do
-      promise.should_receive :reject
-      subject
-    end
-
-    it 'stores the value' do
-      promise.should_receive(:value=).with(:exception)
+      promise.should_receive(:reject).with(:exception)
       subject
     end
   end
