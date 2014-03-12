@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.5"
   %w| rake rspec guard guard-rspec guard-bundler terminal-notifier-guard
-      pry-byebug eventmachine em-http-request celluloid |.each do |gem|
+      pry eventmachine em-http-request celluloid |.each do |gem|
     spec.add_development_dependency gem
   end
 end

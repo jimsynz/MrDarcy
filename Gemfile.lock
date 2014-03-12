@@ -88,6 +88,7 @@ DEPENDENCIES
   guard-bundler
   guard-rspec
   mr_darcy!
+  pry
   pry-byebug
   rake
   rspec
