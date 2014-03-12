@@ -1,89 +1,42 @@
-require 'pry-byebug'
-require 'stateflow'
-Stateflow.persistence = :none
-
 module MrDarcy
-  class Promise
-    include Stateflow
+  module Promise
+    autoload :State,        File.expand_path('../promise/state', __FILE__)
+    autoload :Base,         File.expand_path('../promise/base', __FILE__)
+    autoload :DSL,          File.expand_path('../promise/dsl', __FILE__)
+    autoload :ChildPromise, File.expand_path('../promise/child_promise', __FILE__)
 
-    attr_accessor :value, :deferred_promise
+    autoload :Synchronous,  File.expand_path('../promise/synchronous', __FILE__)
+    autoload :Thread,       File.expand_path('../promise/thread', __FILE__)
+    autoload :Celluloid,    File.expand_path('../promise/celluloid', __FILE__)
+    autoload :EM,           File.expand_path('../promise/em', __FILE__)
 
-    stateflow do
-      initial :unresolved
+    module_function
 
-      state :unresolved
-
-      state :resolved do
-        enter :resolve_deferred_promise
-      end
-
-      state :rejected do
-        enter :reject_deferred_promise
-      end
-
-      event :resolve do
-        transitions from: :unresolved, to: :resolved
-      end
-
-      event :reject do
-        transitions from: :unresolved, to: :rejected
-      end
-    end
-
-    def self.new(&block)
-      super(block)
-    end
-
-    def initialize(block)
-      begin
-        evaluate_promise(block)
-      rescue Exception => e
-        puts "Exception #{e.inspect}"
-        self.value = e
-        self.reject!
+    def new driver: ::MrDarcy.driver, &block
+      case driver
+      when :thread, :Thread
+        ::MrDarcy::Promise::Thread.new block
+      when :synchronous, :Synchronous
+        ::MrDarcy::Promise::Synchronous.new block
+      when :celluloid, :Celluloid
+        ::MrDarcy::Promise::Celluloid.new block
+      when :em, :EM, :event_machine, :eventmachine
+        ::MrDarcy::Promise::EM.new block
+      else
+        raise "Unknown driver #{driver}"
       end
     end
 
-    def then &block
-      self.deferred_promise = Deferred.new
-      deferred_promise.resolve_block = block
-      deferred_promise.parent_resolved(value) if resolved?
-      deferred_promise.promise
-    end
-
-    def fail &block
-      self.deferred_promise = Deferred.new
-      deferred_promise.reject_block = block
-      deferred_promise.parent_rejected(value) if rejected?
-      deferred_promise.promise
-    end
-
-    def result
-      MrDarcy.driver.wait do
-        value
-      end
-    end
-
-    private
-
-    def resolve_deferred_promise
-      MrDarcy.driver.dispatch do
-        deferred_promise && deferred_promise.parent_resolved(value)
-      end
-    end
-
-    def reject_deferred_promise
-      MrDarcy.driver.dispatch do
-        deferred_promise && deferred_promise.parent_rejected(value)
-      end
-    end
-
-    def evaluate_promise(block)
-      dsl = MrDarcy::PromiseDSL.new(self)
-      MrDarcy.driver.dispatch do
-        dsl.instance_exec(&block)
-      end
-    end
+    # def all promises
+    #   deferred = Deferred.new
+    #   last = promises.map do |promise|
+    #     deferred.then do
+    #       promise
+    #     end
+    #   end.last
+    #   deferred.parent_resolved true
+    #   last
+    # end
 
   end
 end

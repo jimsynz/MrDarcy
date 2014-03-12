@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe MrDarcy::PromiseDSL do
+describe MrDarcy::Promise::DSL do
 
   let(:promise) { double :promise }
   let(:dsl)     { described_class.new(promise) }
@@ -8,7 +8,13 @@ describe MrDarcy::PromiseDSL do
 
   it { should respond_to :resolve }
   it { should respond_to :reject }
-  it { should respond_to :promise }
+  it { should respond_to :unresolved? }
+  it { should respond_to :resolved? }
+  it { should respond_to :rejected? }
+  it { should respond_to :then }
+  it { should respond_to :fail }
+  it { should respond_to :result }
+  it { should respond_to :final }
 
   describe '.new' do
     its(:promise) { should eq promise }
@@ -16,10 +22,10 @@ describe MrDarcy::PromiseDSL do
 
   describe '#resolve' do
     subject { dsl.resolve :resolved_value }
-    before  { promise.stub :value= => nil, resolve!: nil }
+    before  { promise.stub :value= => nil, resolve: nil }
 
     it 'resolves the promise' do
-      promise.should_receive :resolve!
+      promise.should_receive :resolve
       subject
     end
 
@@ -31,10 +37,10 @@ describe MrDarcy::PromiseDSL do
 
   describe '#reject' do
     subject { dsl.reject :exception }
-    before  { promise.stub :value= => nil, reject!: nil }
+    before  { promise.stub :value= => nil, reject: nil }
 
     it 'rejects the promise' do
-      promise.should_receive :reject!
+      promise.should_receive :reject
       subject
     end
 

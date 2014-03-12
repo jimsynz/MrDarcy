@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe MrDarcy::Promise do
+
+  before { MrDarcy.driver = :Synchronous }
+  after  { MrDarcy.driver = :Thread }
+
   let(:block)   { proc {} }
   let(:promise) { described_class.new &block }
   subject { promise }
@@ -16,8 +20,8 @@ describe MrDarcy::Promise do
 
   When 'the promise resolves' do
     let(:block) do
-      proc do
-        resolve :it_works
+      proc do |p|
+        p.resolve :it_works
       end
     end
 
@@ -28,8 +32,8 @@ describe MrDarcy::Promise do
 
   When 'the promise rejects' do
     let(:block) do
-      proc do
-        reject :it_rejects
+      proc do |p|
+        p.reject :it_rejects
       end
     end
 

@@ -4,4 +4,5 @@ require 'mr_darcy'
 
 RSpec.configure do |config|
   config.extend ContextHelpers
+  config.extend OnAllDrivers
 end

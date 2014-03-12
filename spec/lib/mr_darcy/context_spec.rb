@@ -19,4 +19,7 @@ describe MrDarcy::Context do
       it { should change { described_class.instance_methods.member? :action_name }.from(false).to(true) }
     end
   end
+
+
+  it { should respond_to :promise }
 end

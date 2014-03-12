@@ -1,6 +1,5 @@
-# source 'https://rubygems.org'
-source 'http://rubygems.rc'
+source 'https://rubygems.org'
 
-gem 'stateflow', path: '///Users/jnh/Dev/forks/stateflow'
+gem 'stateflow', github: 'jamesotron/stateflow', branch: 'after-enter-action'
 # Specify your gem's dependencies in mr_darcy.gemspec
 gemspec

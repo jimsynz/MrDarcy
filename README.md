@@ -1,6 +1,6 @@
 # MrDarcy
 
-An odd take on DCI.
+A mashup of Async Promises and DCI in ruby.
 
 ## Installation
 
@@ -18,7 +18,35 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Such promise. Many then.
+
+Promises are a way of structuring batches of (async) functionality into a
+pipeline, in such a way as to make them seem synchronous.
+
+Here's an example:
+
+```ruby
+# We're going to wrap an asynchronous web request using EventMachine
+# in a promise:
+data = MrDarcy::Promise.new do
+  EM.run do
+    http = EM.HttpRequest.new('http://camp.ruby.org.nz/').get
+    http.errback do
+      reject http.error
+      EM.stop
+    end
+    http.callback do
+      resolve http.response
+      EM.stop
+    end
+  end
+end.then do |response|
+  response.body
+end.result
+
+puts data
+```
+
 
 ## Contributing
 

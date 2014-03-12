@@ -1,11 +1,12 @@
 module MrDarcy
   class Context
 
-    attr_accessor :promise
+    attr_accessor :deferred, :driver
 
     def initialize role_players={}
-      self.promise = Promise.new {}
-      promise.resolve!
+      self.driver  = role_players.delete(:driver) || MrDarcy.driver
+      self.deferred = Deferred.new(driver: driver) {}
+      deferred.resolve nil
 
       roles = self.class.roles
       roles.each do |role_name, role|
@@ -21,22 +22,27 @@ module MrDarcy
     end
 
     def then &block
-      this = self
-      self.promise.then do
-        MrDarcy::Promise.new do
-          resolve this.instance_exec(&block)
-        end
+      deferred.then do |value|
+        self.instance_exec(value, &block)
       end
       self
     end
 
     def fail &block
-      this = self
-      self.promise.fail do
-        MrDarcy::Promise.new do
-          resolve this.instance_exec(&block)
-        end
+      deferred.fail do |value|
+        self.instance_exec(value, &block)
       end
+      self
+    end
+
+    %i| result rejected? resolved? unresolved? |.each do |method|
+      define_method method do
+        deferred.public_send method
+      end
+    end
+
+    def final
+      deferred.final
       self
     end
 
@@ -48,11 +54,8 @@ module MrDarcy
 
       def action action_name, &block
         define_method action_name do |*args|
-          this = self
-          self.promise.then do
-            MrDarcy::Promise.new do
-              resolve this.instance_exec(*args, &block)
-            end
+          self.then do |value|
+            self.instance_exec(*args, &block)
           end
           self
         end
