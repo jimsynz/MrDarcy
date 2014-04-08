@@ -14,13 +14,32 @@ gem 'mr_darcy'
 
 And then execute:
 
-    $ bundle
+```sh
+bundle
+```
 
 Or install it yourself as:
 
-    $ gem install mr_darcy
+```sh
+gem install mr_darcy
+```
 
 ## Usage
+
+### WARNING
+
+MrDarcy is definitely experimental, and was mostly built over the weekend of
+[RailsCamp NZ 5](http://camp.ruby.org.nz/) with the generous help of the
+amazing and sexy [@breccan](https://twitter.com/breccan) and
+[@eoinkelly](https://twitter.com/eoinkelly).
+
+#### Should I use MrDarcy in Production?
+
+No.
+
+#### How can I help make MrDarcy production ready?
+
+Run it in production. Report bugs.
 
 ### Such promise. Many then.
 
@@ -56,10 +75,10 @@ doing async ruby:
   - Naive threads, using MRI's thread implementation.
   - Reactor pattern, using [EventMachine](http://rubyeventmachine.com/) to
     schedule promises on the a reactor thread.
-  - Actor pattern, using [Celluloid](http://celluloid.io/) to run schedule
+  - Actor pattern, using [Celluloid](http://celluloid.io/) to schedule
     promises using Celluloid futures.
 
-Here's the promise cheatsheet:
+#### Key points to know about Promises
 
   1. You create them with a block, which is scheduled asynchronously, and
      inside of which you can place your long-running executable. Inside this
@@ -84,14 +103,19 @@ Here's the promise cheatsheet:
 
      ```ruby
      MrDarcy.promise do
-       resolve 2
+       i = rand
+       i > 0.5 ? resolve i : reject i
      end.then |value|
-       value * value
+       # success
+     end.fail |value|
+       # failure
      end
      ```
 
-  3. Promises returned by `fail` will resolve successfully with the new result
-     of the block, unless the block raises also.
+  3. `fail` is used to catch errors asynchronously, and deal with them.
+     Therefore the result of a `fail` block will be a resolved promise.
+     If you wish to keep processing a failure then you can `raise` it
+     within the `fail` block to pass it along to the next `fail` block.
 
      ```ruby
      MrDarcy.promise do
@@ -131,6 +155,108 @@ Here's the promise cheatsheet:
        # I will be called with 2
      end
      ```
+
+### Sprinkle on some DCI goodness.
+
+[DCI](http://fulloo.info) is a method of specifying interactions between
+objects in a single location, by decorating or extending your data objects
+within a context, running the interaction and then (optionally) removing
+the extensions again.
+
+Other takes on DCI in Ruby:
+  - [playhouse](https://github.com/enspiral/playhouse) is an app framework
+    for building entire apps with DCI from the lovable hippies at
+    [enspiral](http://www.enspiral.com/),
+
+  - [surrounded](https://github.com/saturnflyer/surrounded) by
+    [Jim Gay](https://github.com/saturnflyer) is a gem for doing DCI in
+    a simple, repeatable fashion.
+
+MrDarcy is a little differnt to these approaches, as is builds an interesting
+DSL on top of promises to create contexts that are alive as long as they need
+to be to achieve their goal, even when code is being run asynchronously.
+
+Here's how we define a classic bank trasfer example:
+
+```ruby
+class BankTransfer < MrDarcy::Context
+  role :money_source do
+    def has_available_funds? amount
+      available_balance >= amount
+    end
+
+    def subtract_funds amount
+      self.available_balance = available_balance - amount
+    end
+  end
+
+  role :money_destination do
+    def receive_funds amount
+      self.available_balance = available_balance + amount
+    end
+  end
+
+  action :transfer do |amount|
+    if money_source.has_available_funds? amount
+      money_source.subtract_funds amount
+      money_destination.receive_funds amount
+    else
+      raise "insufficient funds"
+    end
+    amount
+  end
+end
+```
+
+  - The `role` class method defines roles, which the context will expect to be
+    passed on object creation.  They also define the extra behaviour (methods)
+    that we wish to see added to our role players at initialisation.
+
+  - The `action` class method defines our interactions. In other words, this
+    is where we define how the interaction will take place. These also define
+    instance methods on the class of the same name, which return a promise
+    when called.
+
+  - You can have as many roles and actions as needed by your context.
+
+Let's transfer some funds between two accounts:
+
+```ruby
+Account = Struct.new(:available_balance)
+marty     = Account.new(10)
+doc_brown = Account.new(15)
+
+context = BankTransfer.new money_source: marty, money_destination: doc_brown
+context.transfer(5).then do |amount|
+  puts "Successfully transferred #{amount} from #{money_source} to #{money_destination}"
+end
+
+context.transfer(50).fail do |exception|
+  puts "Failed to transfer funds: #{exception.message}"
+end
+```
+
+What's super cool, however is that because promises can return and chain other
+promises, we can come up with some pretty involved scenarios:
+
+```ruby
+marty     = Account.new(10)
+jenn      = Account.new(10)
+doc_brown = Account.new(200)
+
+context = BankTransfer.new money_source: marty, money_destination: jenn
+context.transfer(20).fail do
+  # Oh no, Marty doesn't have enough money, let's borrow some from Doc.
+  BankTransfer.new(money_source: doc_brown, money_destination: marty) \
+    .transfer(20).then
+      # Thy transferring again.
+      context.transfer(20)
+    end
+end
+```
+
+I hope that's enough to get you started.  Yup, it's a bit crazy, but it might
+just work.
 
 ## Contributing
 
