@@ -8,7 +8,9 @@ A mashup of Async Promises and DCI in ruby.
 
 Add this line to your application's Gemfile:
 
-    gem 'mr_darcy'
+```ruby
+gem 'mr_darcy'
+```
 
 And then execute:
 
