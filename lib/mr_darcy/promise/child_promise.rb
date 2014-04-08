@@ -4,6 +4,11 @@ module MrDarcy
 
       attr_accessor :resolve_block, :reject_block
 
+      def initialize opts={}
+        @driver = opts[:driver] if opts.has_key? :driver
+        super
+      end
+
       def parent_resolved value
         begin
           return resolve_with value unless handles_resolve?
@@ -58,9 +63,11 @@ module MrDarcy
       def defer_resolution_via child_promise
         child_promise.then do |value|
           resolve_with value
+          value
         end
         child_promise.fail do |exception|
           reject_with exception
+          exception
         end
       end
 

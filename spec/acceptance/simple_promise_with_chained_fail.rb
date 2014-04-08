@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Simple promise" do
+describe "Promise with then and fail" do
 
   MrDarcy.all_drivers.each do |driver|
     describe "with driver #{driver}" do
@@ -10,19 +10,15 @@ describe "Simple promise" do
       When 'the promise resolves' do
         let(:promise_block) { proc { |p| p.resolve 1 } }
 
+        it_should_behave_like 'a resolved promise'
         its(:result) { should be_nil }
-        its(:final)  { should be_resolved }
-        its(:final)  { should_not be_rejected }
-        its(:final)  { should_not be_unresolved }
       end
 
       When 'the promise rejects' do
         let(:promise_block) { proc { |p| p.reject 1 } }
 
+        it_should_behave_like 'a rejected promise'
         its(:result) { should eq 2 }
-        its(:final)  { should be_resolved }
-        its(:final)  { should_not be_rejected }
-        its(:final)  { should_not be_unresolved }
       end
     end
   end

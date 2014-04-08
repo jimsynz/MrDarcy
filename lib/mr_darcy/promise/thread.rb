@@ -20,17 +20,13 @@ module MrDarcy
       end
 
       def resolve value
-        semaphore.synchronize do
-          super
-          @wait_cond.signal
-        end
+        super
+        @wait_cond.signal
       end
 
       def reject value
-        semaphore.synchronize do
-          super
-          @wait_cond.signal
-        end
+        super
+        @wait_cond.signal
       end
 
       private
@@ -49,6 +45,18 @@ module MrDarcy
 
       def generate_child_promise
         ChildPromise.new driver: :thread
+      end
+
+      def set_value_to value
+        semaphore.synchronize { super }
+      end
+
+      def state_machine_resolve
+        semaphore.synchronize { super }
+      end
+
+      def state_machine_reject
+        semaphore.synchronize { super }
       end
 
     end

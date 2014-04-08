@@ -1,10 +1,11 @@
 module MrDarcy
   module Promise
     class Base
-      def initialize(block)
+
+      def initialize block
         state
         schedule_promise do
-          evaluate_promise(&block)
+          evaluate_promise &block
         end
       end
 
@@ -25,16 +26,16 @@ module MrDarcy
       end
 
       def result
-        raise "Subclasses must implement me"
+        Kernel::raise "Subclasses must implement me"
       end
 
       def final
-        raise "Subclasses must implement me"
+        Kernel::raise "Subclasses must implement me"
       end
 
       def raise
         r = result
-        raise r if rejected?
+        Kernel::raise r if rejected?
       end
 
       %i| resolved? unresolved? rejected? |.each do |method|
@@ -44,14 +45,14 @@ module MrDarcy
       end
 
       def resolve value
-        @value = value
-        state_machine.resolve
+        set_value_to value
+        state_machine_resolve
         resolve_child_promise
       end
 
       def reject exception
-        @value = exception
-        state_machine.reject
+        set_value_to exception
+        state_machine_reject
         reject_child_promise
       end
 
@@ -63,6 +64,18 @@ module MrDarcy
         @state ||= :unresolved
       end
 
+      def set_value_to value
+        @value = value
+      end
+
+      def state_machine_resolve
+        state_machine.resolve
+      end
+
+      def state_machine_reject
+        state_machine.reject
+      end
+
       def state_machine
         State.state(self)
       end
@@ -72,43 +85,31 @@ module MrDarcy
       end
 
       def resolve_child_promise
-        if has_child_promise?
-          if child_promise.unresolved?
-            schedule_promise do
-              child_promise.parent_resolved(value)
-            end
-          else
-            raise "Deferred promise is not unresolved!"
-          end
+        schedule_promise do
+          child_promise.parent_resolved(value) if has_child_promise?
         end
       end
 
       def reject_child_promise
-        if child_promise
-          if child_promise.unresolved?
-            schedule_promise do
-              child_promise.parent_rejected(value)
-            end
-          else
-            raise "Deferred promise is not unresolved!"
-          end
+        schedule_promise do
+          child_promise.parent_rejected(value) if has_child_promise?
         end
       end
 
       def schedule_promise
-        raise "Subclasses must implement me"
+        Kernel::raise "Subclasses must implement me"
       end
 
       def evaluate_promise &block
         begin
           block.call DSL.new(self)
         rescue Exception => e
-          self.reject e
+          reject e
         end
       end
 
       def generate_child_promise
-        raise "Subclasses must implement me"
+        Kernel::raise "Subclasses must implement me"
       end
 
     end

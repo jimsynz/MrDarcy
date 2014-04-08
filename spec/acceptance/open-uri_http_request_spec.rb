@@ -14,6 +14,7 @@ describe "Wrapping OpenURI" do
 
       subject { promise }
 
+      it_should_behave_like 'a resolved promise'
       its(:result) { should match /Rails Camp NZ/i }
     end
   end
