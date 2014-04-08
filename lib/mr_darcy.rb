@@ -17,7 +17,7 @@ module MrDarcy
   end
 
   def all_drivers
-    %i| synchronous thread celluloid em |
+    %w| synchronous thread celluloid em |.map(&:to_sym)
   end
 
   def promise driver: driver, &block

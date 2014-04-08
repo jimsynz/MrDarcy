@@ -38,7 +38,7 @@ module MrDarcy
         Kernel::raise r if rejected?
       end
 
-      %i| resolved? unresolved? rejected? |.each do |method|
+      %w| resolved? unresolved? rejected? |.map(&:to_sym).each do |method|
         define_method method do |*args|
           state_machine.public_send(method, *args)
         end

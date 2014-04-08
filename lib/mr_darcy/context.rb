@@ -52,7 +52,7 @@ module MrDarcy
       self
     end
 
-    %i| result rejected? resolved? unresolved? |.each do |method|
+    %w| result rejected? resolved? unresolved? |.map(&:to_sym).each do |method|
       define_method method do
         deferred.public_send method
       end

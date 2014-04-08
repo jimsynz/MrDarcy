@@ -14,7 +14,7 @@ module MrDarcy
         promise.reject exception
       end
 
-      %i| unresolved? resolved? rejected? then fail result final |.each do |method|
+      %w| unresolved? resolved? rejected? then fail result final |.map(&:to_sym).each do |method|
         define_method method do |*args|
           promise.public_send method, *args
         end

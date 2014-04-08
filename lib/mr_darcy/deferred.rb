@@ -3,7 +3,7 @@ module MrDarcy
 
     attr_accessor :promise, :last_promise
 
-    %i| resolved? rejected? unresolved? resolve reject final result |.each do |method|
+    %w| resolved? rejected? unresolved? resolve reject final result |.map(&:to_sym).each do |method|
       define_method method do |*args|
         promise.public_send method, *args
       end
