@@ -1,44 +1,72 @@
 require 'spec_helper'
 
 describe MrDarcy::Promise do
-
-  before { MrDarcy.driver = :Synchronous }
-  after  { MrDarcy.driver = :Thread }
-
-  let(:block)   { proc {} }
-  let(:promise) { described_class.new &block }
-  subject { promise }
   describe '.new' do
-    it 'takes a block' do
-      expect { |b| described_class.new &b }.to yield_control
-    end
-  end
+    let(:driver) { nil }
+    subject { MrDarcy::Promise.new(driver: driver) {} }
 
-  When 'initially created' do
-    its(:unresolved?) { should be_true }
-  end
+    When 'no driver is provided' do
+      subject { MrDarcy::Promise.new {} }
 
-  When 'the promise resolves' do
-    let(:block) do
-      proc do |p|
-        p.resolve :it_works
+      it 'uses the default' do
+        expect(MrDarcy).to receive(:driver).and_return(:thread)
+        expect(subject).to be_a MrDarcy::Promise::Thread
       end
     end
 
-    its(:resolved?) { should be_true }
-    its(:rejected?) { should be_false }
-    its(:value)     { should eq :it_works }
-  end
-
-  When 'the promise rejects' do
-    let(:block) do
-      proc do |p|
-        p.reject :it_rejects
-      end
+    When 'driver is :thread' do
+      let(:driver) { :thread }
+      it { should be_a MrDarcy::Promise::Thread }
     end
 
-    its(:rejected?) { should be_true }
-    its(:resolved?) { should be_false }
-    its(:value)     { should eq :it_rejects }
+    When 'driver is :Thread' do
+      let(:driver) { :Thread }
+      it { should be_a MrDarcy::Promise::Thread }
+    end
+
+    When 'driver is :synchronous' do
+      let(:driver) { :synchronous }
+      it { should be_a MrDarcy::Promise::Synchronous }
+    end
+
+    When 'driver is :Synchronous' do
+      let(:driver) { :Synchronous }
+      it { should be_a MrDarcy::Promise::Synchronous }
+    end
+
+    When 'driver is :celluloid' do
+      let(:driver) { :celluloid }
+      it { should be_a MrDarcy::Promise::Celluloid }
+    end
+
+    When 'driver is :Celluloid' do
+      let(:driver) { :Celluloid }
+      it { should be_a MrDarcy::Promise::Celluloid }
+    end
+
+    When 'driver is :em' do
+      let(:driver) { :em }
+      it { should be_a MrDarcy::Promise::EM }
+    end
+
+    When 'driver is :EM' do
+      let(:driver) { :EM }
+      it { should be_a MrDarcy::Promise::EM }
+    end
+
+    When 'driver is :event_machine' do
+      let(:driver) { :event_machine }
+      it { should be_a MrDarcy::Promise::EM }
+    end
+
+    When 'driver is :eventmachine' do
+      let(:driver) { :eventmachine }
+      it { should be_a MrDarcy::Promise::EM }
+    end
+
+    When 'driver is :EventMachine' do
+      let(:driver) { :EventMachine }
+      it { should be_a MrDarcy::Promise::EM }
+    end
   end
 end

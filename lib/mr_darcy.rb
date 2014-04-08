@@ -19,4 +19,8 @@ module MrDarcy
   def all_drivers
     %i| synchronous thread celluloid em |
   end
+
+  def promise driver: driver, &block
+    MrDarcy::Promise.new driver: driver, &block
+  end
 end

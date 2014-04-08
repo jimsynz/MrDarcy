@@ -20,23 +20,12 @@ module MrDarcy
         ::MrDarcy::Promise::Synchronous.new block
       when :celluloid, :Celluloid
         ::MrDarcy::Promise::Celluloid.new block
-      when :em, :EM, :event_machine, :eventmachine
+      when :em, :EM, :event_machine, :eventmachine, :EventMachine
         ::MrDarcy::Promise::EM.new block
       else
         raise "Unknown driver #{driver}"
       end
     end
-
-    # def all promises
-    #   deferred = Deferred.new
-    #   last = promises.map do |promise|
-    #     deferred.then do
-    #       promise
-    #     end
-    #   end.last
-    #   deferred.parent_resolved true
-    #   last
-    # end
 
   end
 end
