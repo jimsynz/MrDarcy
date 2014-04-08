@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    mr_darcy (0.0.1)
+    mr_darcy (0.1.0)
 
 GEM
   remote: https://rubygems.org/

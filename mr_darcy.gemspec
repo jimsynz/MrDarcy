@@ -8,9 +8,12 @@ Gem::Specification.new do |spec|
   spec.version       = MrDarcy::VERSION
   spec.authors       = ["James Harton"]
   spec.email         = ["james@resistor.io"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{A mashup of async Promises and DCI in Ruby.}
+  spec.description   = <<-EOF
+  MrDarcy takes async promises from the javascript word, DCI from Jim
+  Gay's brain and sprinkles some ruby on top for great justice!
+  EOF
+  spec.homepage      = "https://github.com/jamesotron/MrDarcy"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
