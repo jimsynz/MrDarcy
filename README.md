@@ -2,6 +2,8 @@
 
 A mashup of Async Promises and DCI in ruby.
 
+![Build Status](https://www.codeship.io/projects/baa3c520-a0e3-0131-f32f-26748b0e5360/status)
+
 ## Installation
 
 Add this line to your application's Gemfile:
