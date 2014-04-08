@@ -1,3 +1,6 @@
+# This class implements a synchronous interface to promise execution.
+# It's not much use, except for unit testing.
+
 module MrDarcy
   module Promise
     class Synchronous < Base
