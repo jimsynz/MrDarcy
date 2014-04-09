@@ -14,10 +14,8 @@ module MrDarcy
 
       private
 
-      def schedule_promise
-        EventMachine.schedule proc do
-          yield
-        end
+      def schedule_promise &block
+        EventMachine.schedule block
       end
 
       def generate_child_promise

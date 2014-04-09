@@ -17,7 +17,8 @@ module MrDarcy
       self.last_promise = last_promise.fail(&block)
     end
 
-    def initialize driver: MrDarcy.driver
+    def initialize opts={}
+      driver = opts[:driver] || MrDarcy.driver
       self.promise = MrDarcy::Promise.new(driver: driver) {}
       self.last_promise = promise
     end

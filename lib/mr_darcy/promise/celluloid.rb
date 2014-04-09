@@ -47,6 +47,18 @@ module MrDarcy
       def generate_child_promise
         ChildPromise.new driver: :thread
       end
+
+      def state_machine_resolve
+        schedule_promise do
+          super
+        end
+      end
+
+      def state_machine_reject
+        schedule_promise do
+          super
+        end
+      end
     end
   end
 end

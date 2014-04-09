@@ -12,7 +12,8 @@ module MrDarcy
 
     module_function
 
-    def new driver: ::MrDarcy.driver, &block
+    def new opts={}, &block
+      driver = opts[:driver] || ::MrDarcy.driver
       case driver
       when :thread, :Thread
         ::MrDarcy::Promise::Thread.new block

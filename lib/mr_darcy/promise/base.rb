@@ -35,7 +35,13 @@ module MrDarcy
 
       def raise
         r = result
-        Kernel::raise r if rejected?
+        if rejected?
+          if r.is_a? Exception
+            super r
+          else
+            super RuntimeError, r
+          end
+        end
       end
 
       %w| resolved? unresolved? rejected? |.map(&:to_sym).each do |method|
@@ -102,7 +108,9 @@ module MrDarcy
 
       def evaluate_promise &block
         begin
-          block.call DSL.new(self)
+          dsl = DSL.new(self)
+          dsl.instance_exec dsl, &block
+          # block.call DSL.new(self)
         rescue Exception => e
           reject e
         end

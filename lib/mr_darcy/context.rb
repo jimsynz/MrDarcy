@@ -28,7 +28,7 @@ module MrDarcy
       roles = self.class.roles
       roles.each do |role_name, role|
         player = role_players[role_name]
-        raise ArgumentError, "No role player for #{role_name} supplied" unless player
+        Kernel::raise ArgumentError, "No role player for #{role_name} supplied" unless player
 
         role.pollute(player)
 

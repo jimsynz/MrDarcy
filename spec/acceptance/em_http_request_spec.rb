@@ -12,7 +12,7 @@ describe "Wrapping em-http-request" do
       http.callback do
         p.resolve http.response
       end
-    end
+    end.final
   end
 
   subject { promise }
