@@ -5,7 +5,7 @@ module MrDarcy
 
     %w| resolved? rejected? unresolved? resolve reject final result |.map(&:to_sym).each do |method|
       define_method method do |*args|
-        promise.public_send method, *args
+        last_promise.public_send method, *args
       end
     end
 
