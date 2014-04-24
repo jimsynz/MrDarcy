@@ -1,23 +1,20 @@
 module MrDarcy
   module Promise
-    class ChildPromise < MrDarcy::Deferred
+    class ChildPromise
 
-      attr_accessor :resolve_block, :reject_block
+      attr_accessor :resolve_block, :reject_block, :promise
 
       def initialize opts={}
-        @driver = opts[:driver] if opts.has_key? :driver
-        super
+        self.promise = MrDarcy.promise(opts) {}
       end
 
       def parent_resolved value
         begin
           return resolve_with value unless handles_resolve?
+
           new_value = result_for :resolve, value
-          if thenable? new_value
-            defer_resolution_via new_value
-          else
-            resolve_with new_value
-          end
+          return defer_resolution_via new_value if thenable? new_value
+          resolve_with new_value
         rescue Exception => e
           reject_with e
         end
@@ -26,12 +23,10 @@ module MrDarcy
       def parent_rejected value
         begin
           return reject_with value unless handles_reject?
+
           new_value = result_for :reject, value
-          if thenable? new_value
-            defer_resolution_via new_value
-          else
-            resolve_with new_value
-          end
+          return defer_resolution_via new_value if thenable? new_value
+          resolve_with new_value
         rescue Exception => e
           reject_with e
         end
@@ -60,12 +55,12 @@ module MrDarcy
         object.respond_to?(:then) && object.respond_to?(:fail)
       end
 
-      def defer_resolution_via child_promise
-        child_promise.then do |value|
+      def defer_resolution_via new_promise
+        new_promise.then do |value|
           resolve_with value
           value
         end
-        child_promise.fail do |exception|
+        new_promise.fail do |exception|
           reject_with exception
           exception
         end
