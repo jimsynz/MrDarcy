@@ -8,7 +8,7 @@ module MrDarcy
       end
 
       def initialize *args
-        raise "EventMachine driver is unsupported on JRuby, sorry" if RUBY_ENGINE=='jruby'
+        Kernel::raise "EventMachine driver is unsupported on JRuby, sorry" if RUBY_ENGINE=='jruby'
         unless EventMachine.reactor_running?
           ::Thread.new { EventMachine.run }
           ::Thread.pass until EventMachine.reactor_running?
