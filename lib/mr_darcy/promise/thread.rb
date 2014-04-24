@@ -1,12 +1,13 @@
+require 'thread'
+require 'fiber'
+
 module MrDarcy
   module Promise
     class Thread < Base
 
       def initialize *args
-        @wait_lock = Mutex.new
-        @wait_cond = ConditionVariable.new
-        @wait_lock.lock
         semaphore
+        semaphore.synchronize { @complete = false }
         super
       end
 
@@ -23,19 +24,15 @@ module MrDarcy
       private
 
       def schedule_promise &block
-        ::Thread.new(&block)
+        ::Thread.new &block
       end
 
       def did_resolve value
-        notify_waiting
+        complete!
       end
 
       def did_reject value
-        notify_waiting
-      end
-
-      def notify_waiting
-        @wait_cond.signal
+        complete!
       end
 
       def resolve_or_reject_child_as_needed
@@ -45,11 +42,19 @@ module MrDarcy
       end
 
       def wait_if_unresolved
-        @wait_cond.wait @wait_lock if unresolved?
+        ::Thread.pass until complete?
       end
 
       def generate_child_promise
         ChildPromise.new driver: :thread
+      end
+
+      def complete?
+        semaphore.synchronize { @complete }
+      end
+
+      def complete!
+        semaphore.synchronize { @complete = true }
       end
 
       def semaphore
