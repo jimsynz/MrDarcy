@@ -63,6 +63,14 @@ module MrDarcy
         ChildPromise.new driver: :em
       end
 
+      def did_resolve value
+        notify_waiting
+      end
+
+      def did_reject value
+        notify_waiting
+      end
+
       def notify_waiting
         EventMachine.defer { @wait_cond.signal }
       end

@@ -63,20 +63,25 @@ module MrDarcy
       attr_accessor :value, :state
 
       def do_resolve value
+        will_resolve value
         set_value_to value
         state_machine_resolve
         resolve_child_promise
-        notify_waiting
+        did_resolve value
       end
 
       def do_reject exception
+        will_reject value
         set_value_to exception
         state_machine_reject
         reject_child_promise
-        notify_waiting
+        did_reject value
       end
 
-      def notify_waiting; end
+      def will_resolve value; end
+      def will_reject value; end
+      def did_resolve value; end
+      def did_reject value; end
 
       def state
         @state ||= :unresolved

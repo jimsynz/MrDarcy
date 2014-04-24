@@ -26,6 +26,14 @@ module MrDarcy
         ::Thread.new(&block)
       end
 
+      def did_resolve value
+        notify_waiting
+      end
+
+      def did_reject value
+        notify_waiting
+      end
+
       def notify_waiting
         @wait_cond.signal
       end
