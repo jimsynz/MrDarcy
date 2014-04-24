@@ -85,5 +85,5 @@ describe MrDarcy::Role do
     subject { player }
 
     it { should_not respond_to :really_a_money_source? }
-  end
+  end unless RUBY_ENGINE == 'jruby'
 end
