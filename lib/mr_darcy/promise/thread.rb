@@ -6,6 +6,7 @@ module MrDarcy
         @wait_lock = Mutex.new
         @wait_cond = ConditionVariable.new
         @wait_lock.lock
+        semaphore
         super
       end
 
@@ -19,43 +20,47 @@ module MrDarcy
         self
       end
 
-      def resolve value
-        super
-        @wait_cond.signal
-      end
-
-      def reject value
-        super
-        @wait_cond.signal
-      end
-
       private
 
       def schedule_promise &block
-        ::Thread.new &block
+        ::Thread.new(&block)
+      end
+
+      def notify_waiting
+        @wait_cond.signal
+      end
+
+      def resolve_or_reject_child_as_needed
+        ::Thread.new do
+          super
+        end
       end
 
       def wait_if_unresolved
         @wait_cond.wait @wait_lock if unresolved?
       end
 
-      def semaphore
-        @semaphore ||= Mutex.new
-      end
-
       def generate_child_promise
         ChildPromise.new driver: :thread
+      end
+
+      def semaphore
+        @semaphore ||= Mutex.new
       end
 
       def set_value_to value
         semaphore.synchronize { super }
       end
 
-      def state_machine_resolve
+      def state_machine
         semaphore.synchronize { super }
       end
 
-      def state_machine_reject
+      def child_promise
+        semaphore.synchronize { super }
+      end
+
+      def value
         semaphore.synchronize { super }
       end
 

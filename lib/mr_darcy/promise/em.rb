@@ -13,28 +13,22 @@ module MrDarcy
           ::Thread.new { EventMachine.run }
           ::Thread.pass until EventMachine.reactor_running?
         end
-        deferrable_adapter.callback do |value|
-          set_value_to value
-          state_machine_resolve
-          resolve_child_promise
-          notify_waiting
-        end
-        deferrable_adapter.errback do |value|
-          set_value_to value
-          state_machine_reject
-          reject_child_promise
-          notify_waiting
-        end
-        channel
+        @wait_lock = Mutex.new
+        @wait_cond = ConditionVariable.new
+        @wait_lock.lock
+        deferrable_adapter.callback &method(:do_resolve)
+        deferrable_adapter.errback &method(:do_reject)
         super
       end
 
       def resolve value
         deferrable_adapter.set_deferred_status :succeeded, value
+        self
       end
 
       def reject value
         deferrable_adapter.set_deferred_status :failed, value
+        self
       end
 
       def result
@@ -49,18 +43,8 @@ module MrDarcy
 
       private
 
-      def notify_waiting
-        until wait_queue.num_waiting == 0
-          wait_queue.push nil
-        end
-      end
-
       def wait_if_unresolved
-        wait_queue.pop if unresolved?
-      end
-
-      def wait_queue
-        @wait_queue ||= Queue.new
+        @wait_cond.wait @wait_lock if unresolved?
       end
 
       def deferrable_adapter
@@ -71,12 +55,16 @@ module MrDarcy
         EventMachine.defer block
       end
 
-      def channel
-        @channel ||= EventMachine::Channel.new
+      def resolve_or_reject_child_as_needed
+        EventMachine.defer { super }
       end
 
       def generate_child_promise
         ChildPromise.new driver: :em
+      end
+
+      def notify_waiting
+        EventMachine.defer { @wait_cond.signal }
       end
 
     end

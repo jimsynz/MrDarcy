@@ -10,18 +10,16 @@ module MrDarcy
       end
 
       def then &block
-        @child_promise ||= generate_child_promise
+        ensure_child_promise
         child_promise.resolve_block = block
-        resolve_child_promise if resolved?
-        reject_child_promise  if rejected?
+        resolve_or_reject_child_as_needed
         child_promise.promise
       end
 
       def fail &block
-        @child_promise ||= generate_child_promise
+        ensure_child_promise
         child_promise.reject_block = block
-        resolve_child_promise if resolved?
-        reject_child_promise  if rejected?
+        resolve_or_reject_child_as_needed
         child_promise.promise
       end
 
@@ -51,20 +49,34 @@ module MrDarcy
       end
 
       def resolve value
-        set_value_to value
-        state_machine_resolve
-        resolve_child_promise
+        do_resolve value
+        self
       end
 
       def reject exception
-        set_value_to exception
-        state_machine_reject
-        reject_child_promise
+        do_reject exception
+        self
       end
 
       private
 
-      attr_accessor :value, :child_promise, :state
+      attr_accessor :value, :state
+
+      def do_resolve value
+        set_value_to value
+        state_machine_resolve
+        resolve_child_promise
+        notify_waiting
+      end
+
+      def do_reject exception
+        set_value_to exception
+        state_machine_reject
+        reject_child_promise
+        notify_waiting
+      end
+
+      def notify_waiting; end
 
       def state
         @state ||= :unresolved
@@ -91,15 +103,16 @@ module MrDarcy
       end
 
       def resolve_child_promise
-        schedule_promise do
-          child_promise.parent_resolved(value) if has_child_promise?
-        end
+        child_promise.parent_resolved(value) if has_child_promise?
       end
 
       def reject_child_promise
-        schedule_promise do
-          child_promise.parent_rejected(value) if has_child_promise?
-        end
+        child_promise.parent_rejected(value) if has_child_promise?
+      end
+
+      def resolve_or_reject_child_as_needed
+        resolve_child_promise if resolved?
+        reject_child_promise  if rejected?
       end
 
       def schedule_promise
@@ -118,6 +131,14 @@ module MrDarcy
 
       def generate_child_promise
         Kernel::raise "Subclasses must implement me"
+      end
+
+      def ensure_child_promise
+        @child_promise ||= generate_child_promise
+      end
+
+      def child_promise
+        @child_promise
       end
 
     end

@@ -9,16 +9,6 @@ module MrDarcy
         super
       end
 
-      def resolve value
-        super
-        condition.signal if @waiting
-      end
-
-      def reject exception
-        super
-        condition.signal if @waiting
-      end
-
       def result
         wait_until_not_unresolved
         value
@@ -30,6 +20,10 @@ module MrDarcy
       end
 
       private
+
+      def notify_waiting
+        condition.signal if @waiting
+      end
 
       def schedule_promise &block
         ::Celluloid::Future.new &block
