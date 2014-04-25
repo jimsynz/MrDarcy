@@ -7,6 +7,7 @@ module MrDarcy
         schedule_promise do
           evaluate_promise &block
         end
+        did_initialize
       end
 
       def then &block
@@ -82,6 +83,7 @@ module MrDarcy
       def will_reject value; end
       def did_resolve value; end
       def did_reject value; end
+      def did_initialize; end
 
       def state
         @state ||= :unresolved
