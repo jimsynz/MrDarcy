@@ -6,7 +6,7 @@ module MrDarcy
     class Thread < Base
 
       def initialize *args
-        semaphore
+        @semaphore = Mutex.new
         semaphore.synchronize { @complete = false }
         super
       end
@@ -35,14 +35,12 @@ module MrDarcy
         complete!
       end
 
-      def resolve_or_reject_child_as_needed
-        ::Thread.new do
-          super
-        end
-      end
-
       def wait_if_unresolved
-        ::Thread.pass until complete?
+        return if complete?
+        semaphore.synchronize do
+          @wait = ConditionVariable.new
+          @wait.wait(semaphore)
+        end
       end
 
       def generate_child_promise
@@ -54,11 +52,14 @@ module MrDarcy
       end
 
       def complete!
-        semaphore.synchronize { @complete = true }
+        semaphore.synchronize do
+          @complete = true
+          @wait.broadcast if @wait
+        end
       end
 
       def semaphore
-        @semaphore ||= Mutex.new
+        @semaphore
       end
 
       def set_value_to value
