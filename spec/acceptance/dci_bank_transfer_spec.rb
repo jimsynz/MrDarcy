@@ -22,7 +22,7 @@ class BankTransfer < MrDarcy::Context
       money_source.subtract_funds amount
       money_destination.receive_funds amount
     else
-      raise "insufficient funds"
+      raise RuntimeError, "insufficient funds"
     end
     amount
   end

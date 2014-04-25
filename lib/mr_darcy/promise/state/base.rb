@@ -21,11 +21,11 @@ module MrDarcy
         end
 
         def resolve
-          raise "Can't resolve from #{get_state} state"
+          raise RuntimeError, "Can't resolve from #{get_state} state"
         end
 
         def reject
-          raise "Cant reject from #{get_state} state"
+          raise RuntimeError, "Cant reject from #{get_state} state"
         end
 
         private

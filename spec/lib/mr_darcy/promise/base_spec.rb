@@ -73,7 +73,7 @@ describe MrDarcy::Promise::Base do
       before { mock_promise.reject :bad }
 
       When 'the fail block re-fails' do
-        let(:fail_block) { proc { raise :bad } }
+        let(:fail_block) { proc { raise RuntimeError, :bad } }
 
         it_behaves_like 'a rejected promise'
       end
