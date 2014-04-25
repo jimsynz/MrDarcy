@@ -16,7 +16,7 @@ module MrDarcy
           return defer_resolution_via new_value if thenable? new_value
           resolve_with new_value
         rescue Exception => e
-          reject_with e
+          handle_exception e
         end
       end
 
@@ -28,11 +28,21 @@ module MrDarcy
           return defer_resolution_via new_value if thenable? new_value
           resolve_with new_value
         rescue Exception => e
-          reject_with e
+          handle_exception e
         end
       end
 
       private
+
+      def handle_exception e
+        if promise.unresolved?
+          return reject_with e
+        elsif promise.resolved?
+          promise.then { raise e }
+        elsif promise.rejected?
+          promise.fail { raise e }
+        end
+      end
 
       def result_for which, value
         block = public_send("#{which}_block")
