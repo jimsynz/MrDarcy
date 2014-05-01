@@ -17,11 +17,10 @@ module MrDarcy
   end
 
   def all_drivers
-    drivers = %w| synchronous thread celluloid em |.map(&:to_sym)
-
+    return @drivers if @drivers && !@drivers.empty?
+    drivers ||= %w| synchronous thread celluloid em |.map(&:to_sym)
     drivers.delete :em if RUBY_ENGINE=='jruby'
-
-    drivers
+    @drivers = drivers
   end
 
   def promise opts={}, &block

@@ -10,13 +10,19 @@ describe MrDarcy do
     subject { MrDarcy.all_drivers }
 
     When 'running on jruby' do
-      before { stub_const 'RUBY_ENGINE', 'jruby' }
+      before do
+        MrDarcy.all_drivers.clear
+        stub_const 'RUBY_ENGINE', 'jruby'
+      end
 
       it { should_not include :em }
     end
 
     Otherwise do
-      before { stub_const 'RUBY_ENGINE', 'mri'}
+      before do
+        MrDarcy.all_drivers.clear
+        stub_const 'RUBY_ENGINE', 'mri'
+      end
 
       it { should include :synchronous }
       it { should include :thread }
