@@ -28,4 +28,8 @@ module MrDarcy
     MrDarcy::Promise.new driver: driver, &block
   end
 
+  def all_promises opts={}
+    MrDarcy::Promise::Collection.new yield, opts
+  end
+
 end

@@ -156,6 +156,24 @@ doing async ruby:
      end
      ```
 
+#### Promise collections
+
+If you have a bunch of promises, and you'd like to know when they're all
+complete then you can use the `MrDarcy.all_promises` method:
+
+```ruby
+MrDarcy.all_promises do
+  10.times.map { |i| MrDarcy.promise { sleep 1; resolve i } }
+end.then do |values|
+  puts "All done."
+end
+```
+
+In the above example, all 10 promises will execute simultaneously, the message
+`All done.` will be printed to standard out, after approximately one second.
+
+It will also reject as soon as the first promise rejects.
+
 ### Sprinkle on some DCI goodness.
 
 [DCI](http://fulloo.info) is a method of specifying interactions between

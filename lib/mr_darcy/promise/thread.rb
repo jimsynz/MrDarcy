@@ -27,6 +27,14 @@ module MrDarcy
         ::Thread.new &block
       end
 
+      def resolve_child_promise
+        ::Thread.new { super }
+      end
+
+      def reject_child_promise
+        ::Thread.new { super }
+      end
+
       def did_resolve value
         complete!
       end
@@ -48,7 +56,8 @@ module MrDarcy
       end
 
       def complete?
-        semaphore.synchronize { @complete }
+        # semaphore.synchronize { @complete }
+        @complete
       end
 
       def complete!

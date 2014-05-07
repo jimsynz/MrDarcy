@@ -72,11 +72,11 @@ module MrDarcy
       end
 
       def do_reject exception
-        will_reject value
+        will_reject exception
         set_value_to exception
         state_machine_reject
         reject_child_promise
-        did_reject value
+        did_reject exception
       end
 
       def will_resolve value; end

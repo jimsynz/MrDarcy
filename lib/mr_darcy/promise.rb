@@ -9,6 +9,7 @@ module MrDarcy
     autoload :Thread,       File.expand_path('../promise/thread', __FILE__)
     autoload :Celluloid,    File.expand_path('../promise/celluloid', __FILE__)
     autoload :EM,           File.expand_path('../promise/em', __FILE__)
+    autoload :Collection,   File.expand_path('../promise/collection', __FILE__)
 
     module_function
 
