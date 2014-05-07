@@ -3,7 +3,7 @@ module MrDarcy
 
     attr_accessor :promise, :last_promise
 
-    %w| resolved? rejected? unresolved? resolve reject final result |.map(&:to_sym).each do |method|
+    %w| resolved? rejected? unresolved? resolve reject final result raise |.map(&:to_sym).each do |method|
       define_method method do |*args|
         last_promise.public_send method, *args
       end
@@ -17,7 +17,7 @@ module MrDarcy
       self.last_promise = last_promise.fail(&block)
     end
 
-    def initialize opts={}
+    def initialize opts={}, &block
       driver = opts[:driver] || MrDarcy.driver
       self.promise = MrDarcy::Promise.new(driver: driver) {}
       self.last_promise = promise
