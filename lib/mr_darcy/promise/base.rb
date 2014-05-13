@@ -129,8 +129,7 @@ module MrDarcy
       def evaluate_promise &block
         begin
           dsl = DSL.new(self)
-          dsl.instance_exec dsl, &block
-          # block.call DSL.new(self)
+          block.call DSL.new(self)
         rescue Exception => e
           reject e
         end

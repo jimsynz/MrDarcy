@@ -8,14 +8,12 @@ module MrDarcy
       include Enumerable
 
       def initialize promises, opts={}
-        @lock = Mutex.new
-        this  = self
-
+        @lock     = Mutex.new
         @promises = []
         @size     = promises.size
         @promise  = MrDarcy.promise opts do
           promises.each do |p|
-            this.send :add_promise, p
+            add_promise p
           end
         end
       end

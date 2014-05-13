@@ -33,6 +33,45 @@ MrDarcy is definitely experimental, and was mostly built over the weekend of
 amazing and sexy [@breccan](https://twitter.com/breccan) and
 [@eoinkelly](https://twitter.com/eoinkelly).
 
+### API Changes (0.4.0 and above)
+
+As of version `0.4.0` the `instance_exec` of promise blocks has been removed
+(meaning that you can't call `resolve` or `reject` from directly inside your
+promise blocks).  This is becuase `instance_exec` changes the binding of
+`self` inside the promise, and will cause calls to enclosed methods to fail.
+
+For example:
+
+```ruby
+class InstanceExecExample
+
+  def example_method
+    puts "I did a thing"
+  end
+
+  def make_promise
+    MrDarcy.promise { resolve example_method }.raise
+  end
+end
+```
+
+Will raise:
+
+```
+NameError in `block in make_promise': undefined local variable or method `example_method' for #<MrDarcy::Promise::DSL:0x007fcc542d75d0>
+```
+
+As of `0.4.0` the DSL object wll be passed to the promise block as an argument,
+therefore:
+
+```
+  def make_promise
+    MrDarcy.promise { |promise| promise.resolve example_method }.raise
+  end
+```
+
+will not raise an exception.
+
 #### Should I use MrDarcy in Production?
 
 No.
@@ -51,15 +90,15 @@ Here's an example:
 ```ruby
 # We're going to wrap an asynchronous web request using EventMachine
 # in a promise:
-data = MrDarcy.promise do
+data = MrDarcy.promise do |promise|
   EM.run do
     http = EM.HttpRequest.new('http://camp.ruby.org.nz/').get
     http.errback do
-      reject http.error
+      promise.reject http.error
       EM.stop
     end
     http.callback do
-      resolve http.response
+      promise.resolve http.response
       EM.stop
     end
   end
@@ -86,12 +125,12 @@ doing async ruby:
      or reject the promise.
 
      ```ruby
-     MrDarcy.promise do
+     MrDarcy.promise do |promise|
        accellerate_the_delorean
        if speed >= 88
-         resolve :time_flux_initiated
+         promise.resolve :time_flux_initiated
        else
-         reject :engage_service_brake
+         promise.reject :engage_service_brake
        end
      end
      ```
@@ -102,9 +141,9 @@ doing async ruby:
      `fail` calls.
 
      ```ruby
-     MrDarcy.promise do
+     MrDarcy.promise do |promise|
        i = rand
-       i > 0.5 ? resolve i : reject i
+       i > 0.5 ? promise.resolve i : promise.reject i
      end.then |value|
        # success
      end.fail |value|
@@ -118,8 +157,8 @@ doing async ruby:
      within the `fail` block to pass it along to the next `fail` block.
 
      ```ruby
-     MrDarcy.promise do
-       reject 2
+     MrDarcy.promise do |promise|
+       promise.reject 2
      end.fail |value|
        value * value
      end.then |value|
@@ -130,8 +169,8 @@ doing async ruby:
   4. Failures cascade until they're caught:
 
      ```ruby
-     MrDarcy.promise do
-       reject :fail
+     MrDarcy.promise do |promise|
+       promise.reject :fail
      end.then
        # I am skipped
      end.then
@@ -145,11 +184,11 @@ doing async ruby:
      their resolution until the new promise is resolved:
 
      ```ruby
-     MrDarcy.promise do
-       resolve 1
+     MrDarcy.promise do |promise|
+       promise.resolve 1
      end.then do |value|
-       MrDarcy.promise do
-         resolve value * 2
+       MrDarcy.promise do |p|
+         p.resolve value * 2
        end
      end.then |value|
        # I will be called with 2
@@ -163,7 +202,7 @@ complete then you can use the `MrDarcy.all_promises` method:
 
 ```ruby
 MrDarcy.all_promises do
-  10.times.map { |i| MrDarcy.promise { sleep 1; resolve i } }
+  10.times.map { |i| MrDarcy.promise { |p| sleep 1; p.resolve i } }
 end.then do |values|
   puts "All done."
 end
@@ -278,7 +317,7 @@ just work.
 
 ## Contributing
 
-1. Fork it ( http://github.com/<my-github-username>/mr_darcy/fork )
+1. Fork it ( http://github.com/jamesotron/mr_darcy/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
