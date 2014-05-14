@@ -51,6 +51,10 @@ module MrDarcy
         end
       end
 
+      def ensure_child_promise
+        semaphore.synchronize { super }
+      end
+
       def generate_child_promise
         ChildPromise.new driver: :thread
       end
