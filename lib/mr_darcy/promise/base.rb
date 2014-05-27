@@ -10,9 +10,10 @@ module MrDarcy
         did_initialize
       end
 
-      def then &block
+      def then failable=nil, &block
         ensure_child_promise
         child_promise.resolve_block = block
+        child_promise.reject_block  = failable if failable.respond_to? :call
         resolve_or_reject_child_as_needed
         child_promise.promise
       end

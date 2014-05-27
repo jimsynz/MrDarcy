@@ -34,6 +34,12 @@ describe MrDarcy::Promise::Base do
       it 'calls the then block only once' do
         expect { |b| mock_promise.then(&b) }.to yield_control.once
       end
+
+      When 'then is passed a callable for failure' do
+        it 'does not call the failure callable' do
+          expect { |b| mock_promise.then(b.to_proc) {} }.not_to yield_control
+        end
+      end
     end
 
     When 'the promise is already rejected' do
@@ -42,6 +48,12 @@ describe MrDarcy::Promise::Base do
 
       it 'does not call the then block' do
         expect { |b| mock_promise.then(&b) }.not_to yield_control
+      end
+
+      When 'then is passed a callable for failure' do
+        it 'calls the failure callable' do
+          expect { |b| mock_promise.then(b.to_proc) {} }.to yield_control
+        end
       end
     end
 
