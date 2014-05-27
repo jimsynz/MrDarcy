@@ -28,6 +28,10 @@ module MrDarcy
         Kernel::raise "Subclasses must implement me"
       end
 
+      def value
+        result
+      end
+
       def final
         Kernel::raise "Subclasses must implement me"
       end
@@ -61,7 +65,7 @@ module MrDarcy
 
       private
 
-      attr_accessor :value, :state
+      attr_accessor :state
 
       def do_resolve value
         will_resolve value
@@ -93,6 +97,10 @@ module MrDarcy
         @value = value
       end
 
+      def get_value
+        @value
+      end
+
       def state_machine_resolve
         state_machine.resolve
       end
@@ -110,11 +118,11 @@ module MrDarcy
       end
 
       def resolve_child_promise
-        child_promise.parent_resolved(value) if has_child_promise?
+        child_promise.parent_resolved(@value) if has_child_promise?
       end
 
       def reject_child_promise
-        child_promise.parent_rejected(value) if has_child_promise?
+        child_promise.parent_rejected(@value) if has_child_promise?
       end
 
       def resolve_or_reject_child_as_needed

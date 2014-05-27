@@ -6,7 +6,7 @@ module MrDarcy
     class Synchronous < Base
 
       def result
-        value
+        get_value
       end
 
       def final

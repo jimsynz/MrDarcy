@@ -13,7 +13,7 @@ module MrDarcy
 
       def result
         wait_if_unresolved
-        value
+        get_value
       end
 
       def final
@@ -87,7 +87,7 @@ module MrDarcy
         semaphore.synchronize { super }
       end
 
-      def value
+      def get_value
         semaphore.synchronize { super }
       end
 

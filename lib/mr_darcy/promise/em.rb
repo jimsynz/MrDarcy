@@ -33,7 +33,7 @@ module MrDarcy
 
       def result
         wait_if_unresolved
-        value
+        get_value
       end
 
       def final

@@ -59,7 +59,7 @@ module MrDarcy
 
       def result
         wait_until_complete
-        value
+        get_value
       end
 
       def final

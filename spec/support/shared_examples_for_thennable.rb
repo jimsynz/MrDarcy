@@ -2,6 +2,7 @@ shared_examples_for :thenable do
   it { should respond_to :then }
   it { should respond_to :fail }
   it { should respond_to :result }
+  it { should respond_to :value }
   it { should respond_to :final }
   it { should respond_to :raise }
   it { should respond_to :unresolved? }
