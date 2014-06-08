@@ -306,7 +306,7 @@ context.transfer(20).fail do
   # Oh no, Marty doesn't have enough money, let's borrow some from Doc.
   BankTransfer.new(money_source: doc_brown, money_destination: marty) \
     .transfer(20).then
-      # Thy transferring again.
+      # Try transferring again.
       context.transfer(20)
     end
 end
