@@ -1,23 +1,28 @@
+# A wrapper around promises that can be externally resolved.
+
 module MrDarcy
   class Deferred
+    extend Forwardable
+
+    def_delegators :last_promise, :resolved?, :rejected?, :unresolved?, :resolve, :reject, :final, :result, :raise
 
     attr_accessor :promise, :last_promise
 
-    %w| resolved? rejected? unresolved? resolve reject final result raise |.map(&:to_sym).each do |method|
-      define_method method do |*args|
-        last_promise.public_send method, *args
-      end
-    end
-
+    # See MrDarcy::Promise::Base#then
     def then &block
       self.last_promise = last_promise.then(&block)
     end
 
+    # See MrDarcy::Promise::Base#fail
     def fail &block
       self.last_promise = last_promise.fail(&block)
     end
 
-    def initialize opts={}, &block
+    # Create a new deferred.
+    # Takes the following options:
+    #
+    #   * driver: override the default driver for this promise.
+    def initialize opts={}
       driver = opts[:driver] || MrDarcy.driver
       self.promise = MrDarcy::Promise.new(driver: driver) {}
       self.last_promise = promise

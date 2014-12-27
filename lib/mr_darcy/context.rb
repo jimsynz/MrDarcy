@@ -47,7 +47,7 @@ module MrDarcy
     #   BankTransfer.new money_source: account1, money_destination: account2
     def initialize role_players={}
       @driver   = role_players.delete(:driver) || MrDarcy.driver
-      @deferred = Deferred.new(driver: driver) {}
+      @deferred = Deferred.new(driver: driver)
       deferred.resolve nil
 
       roles = self.class.roles
