@@ -24,6 +24,10 @@ Or install it yourself as:
 gem install mr_darcy
 ```
 
+## Documentation
+
+API Documentation is available on [rdoc.info](http://rdoc.info/gems/mr_darcy/)
+
 ## Usage
 
 ### WARNING
