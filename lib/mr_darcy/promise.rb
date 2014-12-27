@@ -1,3 +1,4 @@
+# :nodoc:
 module MrDarcy
   module Promise
     autoload :State,        File.expand_path('../promise/state', __FILE__)
