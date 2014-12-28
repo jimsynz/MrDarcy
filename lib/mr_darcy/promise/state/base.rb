@@ -1,9 +1,8 @@
 module MrDarcy
   module Promise
     module State
+      # Abstract base class for all Promise states.
       class Base
-        attr_accessor :stateful
-
         def initialize stateful
           self.stateful = stateful
         end
@@ -29,6 +28,8 @@ module MrDarcy
         end
 
         private
+
+        attr_reader :stateful
 
         def get_state
           stateful.send :state

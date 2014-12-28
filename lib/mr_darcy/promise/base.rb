@@ -1,7 +1,13 @@
 module MrDarcy
   module Promise
-    class Base
 
+    # An abstract superclass for all promise implementations.
+    class Base
+      extend Forwardable
+
+      def_delegators :state_machine, :resolved?, :unresolved?, :rejected?
+
+      # Create a new promise and schedule it for execution.
       def initialize block
         state
         schedule_promise do
@@ -10,6 +16,8 @@ module MrDarcy
         did_initialize
       end
 
+      # Create a new promise that resolves and calls the supplied
+      # block when this promise is resolved.
       def then &block
         ensure_child_promise
         child_promise.resolve_block = block
@@ -17,6 +25,8 @@ module MrDarcy
         child_promise.promise
       end
 
+      # Create a new promise that rejects and calls the supplied
+      # block when this promise is rejected.
       def fail &block
         ensure_child_promise
         child_promise.reject_block = block
@@ -24,14 +34,19 @@ module MrDarcy
         child_promise.promise
       end
 
+      # Wait until the promise is resolved or rejected and return it's
+      # result value.
       def result
         Kernel::raise "Subclasses must implement me"
       end
 
+      # Wait until the promise is resolved or rejected and return self.
       def final
         Kernel::raise "Subclasses must implement me"
       end
 
+      # Wait until the promise is resolver or rejected, and if rejected
+      # raise the error value in this context.
       def raise
         r = result
         if rejected?
@@ -43,17 +58,13 @@ module MrDarcy
         end
       end
 
-      %w| resolved? unresolved? rejected? |.map(&:to_sym).each do |method|
-        define_method method do |*args|
-          state_machine.public_send(method, *args)
-        end
-      end
-
+      # Resolve this promise with the provided value.
       def resolve value
         do_resolve value
         self
       end
 
+      # Reject this promise with the provided error/value.
       def reject exception
         do_reject exception
         self

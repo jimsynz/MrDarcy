@@ -3,10 +3,14 @@ require 'thread'
 module MrDarcy
   module Promise
     class Collection
-      attr_accessor :promises, :size
-
       include Enumerable
+      extend Forwardable
 
+      def_delegators :my_promise, :rejected?, :resolved?, :unresolved?, :raise, :result, :then, :fail
+
+      # Creates a meta-promise based on a collection of promises.
+      # * promises: an array of promises
+      # * opts: options for MrDarcy.promise
       def initialize promises, opts={}
         @lock     = Mutex.new
         @promises = []
@@ -18,31 +22,30 @@ module MrDarcy
         end
       end
 
-      %w| resolved? rejected? unresolved? result raise then fail |.each do |method|
-        define_method method do |*args,&block|
-          my_promise.public_send method, *args, &block
-        end
-      end
-
+      # See MrDarcy::Promise::Base#final
       def final
         my_promise.final
         self
       end
 
+      # Allow iteration of promises for Enumerable.
       def each &block
         promises.each &block
       end
 
+      # Add a new promise to our collection.
       def push promise
         @lock.synchronize { @size = @size + 1 }
         add_promise promise
       end
       alias << push
 
+      # Return the number of promises in this collection.
       def size
         @lock.synchronize { @size }
       end
 
+      # Return an array of promises in this collection.
       def promises
         @lock.synchronize { @promises }
       end

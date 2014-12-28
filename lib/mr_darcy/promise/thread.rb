@@ -3,6 +3,9 @@ require 'fiber'
 
 module MrDarcy
   module Promise
+    # Implementation of promises using Ruby threads and locks.
+    #
+    # See MrDarcy::Promise::Base for method information.
     class Thread < Base
 
       def initialize *args

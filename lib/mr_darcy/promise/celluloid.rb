@@ -2,7 +2,14 @@ require 'celluloid/autostart'
 
 module MrDarcy
   module Promise
+
+    # A specialisation of MrDarcy::Promise::Base to work with
+    # Celluloid.
+    #
+    # See MrDarcy::Promise::Base for method information.
     class Celluloid < Base
+      # Each promise gets it's own actor thread.
+      # :nodoc:
       class Actor
         include ::Celluloid
 

@@ -3,6 +3,8 @@
 
 module MrDarcy
   module Promise
+    # An implementation of synchronous promises, only for testing because
+    # it violates several rules of promises.
     class Synchronous < Base
 
       def result

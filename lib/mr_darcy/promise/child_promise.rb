@@ -1,5 +1,7 @@
 module MrDarcy
   module Promise
+    # A special variety of promise created by Base#then and Base#fail
+    # methods.
     class ChildPromise
 
       attr_accessor :resolve_block, :reject_block, :promise
@@ -8,6 +10,7 @@ module MrDarcy
         self.promise = MrDarcy.promise(opts) {}
       end
 
+      # Called by the parent promise when it resolves.
       def parent_resolved value
         begin
           return resolve_with value unless handles_resolve?
@@ -20,6 +23,7 @@ module MrDarcy
         end
       end
 
+      # Called by the parent promise when it rejects.
       def parent_rejected value
         begin
           return reject_with value unless handles_reject?

@@ -2,6 +2,9 @@ require 'eventmachine'
 
 module MrDarcy
   module Promise
+    # EventMachine implementation of promises.
+    #
+    # See MrDarcy::Promise::Base for method documentation.
     class EM < Base
       class DeferrableAdapter
         include EventMachine::Deferrable

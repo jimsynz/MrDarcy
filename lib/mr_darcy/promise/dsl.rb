@@ -1,28 +1,14 @@
 module MrDarcy
   module Promise
+    # Syntax wrapper around Promise. Can probably be removed now.
     class DSL
+      extend Forwardable
+
+      def_delegators :@promise, :resolve, :reject, :unresolved?, :resolved?, :rejected?, :then, :fail, :result, :final
 
       def initialize promise
         @promise = promise
       end
-
-      def resolve(value)
-        promise.resolve value
-      end
-
-      def reject(exception)
-        promise.reject exception
-      end
-
-      %w| unresolved? resolved? rejected? then fail result final |.map(&:to_sym).each do |method|
-        define_method method do |*args|
-          promise.public_send method, *args
-        end
-      end
-
-      private
-
-      attr_accessor :promise
 
     end
   end

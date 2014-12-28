@@ -1,5 +1,6 @@
 module MrDarcy
   module Promise
+    # Implementation of the State Pattern for Promises.
     module State
       autoload :Base,       File.expand_path('../state/base', __FILE__)
       autoload :Unresolved, File.expand_path('../state/unresolved', __FILE__)
@@ -8,6 +9,8 @@ module MrDarcy
 
       module_function
 
+      # Return an instance of the correct State class based on the state of
+      # the passed in object.
       def state stateful
         case stateful.send :state
         when :unresolved
