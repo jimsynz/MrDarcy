@@ -16,10 +16,6 @@ describe MrDarcy::Promise::DSL do
   it { should respond_to :result }
   it { should respond_to :final }
 
-  describe '.new' do
-    its(:promise) { should eq promise }
-  end
-
   describe '#resolve' do
     subject { dsl.resolve :resolved_value }
     before  { promise.stub :value= => nil, resolve: nil }

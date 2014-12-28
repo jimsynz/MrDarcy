@@ -6,8 +6,6 @@ describe MrDarcy::Promise::State::Base do
   let(:state)         { described_class.new stateful }
   subject { state }
 
-  it { should respond_to :stateful }
-  it { should respond_to :stateful= }
   it { should respond_to :unresolved? }
   it { should respond_to :resolved? }
   it { should respond_to :rejected? }

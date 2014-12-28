@@ -4,7 +4,7 @@ module MrDarcy
       # Abstract base class for all Promise states.
       class Base
         def initialize stateful
-          self.stateful = stateful
+          @stateful = stateful
         end
 
         def unresolved?
