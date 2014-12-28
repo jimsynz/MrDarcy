@@ -1,3 +1,4 @@
+# :nodoc:
 module MrDarcy
   module Drivers
     autoload :Synchronous, File.expand_path('../drivers/synchronous.rb', __FILE__)
