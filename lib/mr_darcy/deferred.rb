@@ -6,7 +6,7 @@ module MrDarcy
 
     def_delegators :last_promise, :resolved?, :rejected?, :unresolved?, :resolve, :reject, :final, :result, :raise
 
-    attr_accessor :promise, :last_promise
+    attr_reader :promise, :last_promise
 
     # See MrDarcy::Promise::Base#then
     def then &block
@@ -21,11 +21,15 @@ module MrDarcy
     # Create a new deferred.
     # Takes the following options:
     #
-    #   * driver: override the default driver for this promise.
+    # * driver: override the default driver for this promise.
     def initialize opts={}
       driver = opts[:driver] || MrDarcy.driver
       self.promise = MrDarcy::Promise.new(driver: driver) {}
       self.last_promise = promise
     end
+
+    private
+
+    attr_writer :promise, :last_promise
   end
 end

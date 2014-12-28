@@ -36,13 +36,13 @@ module MrDarcy
   # Generate a new promise with the provided block.
   # Accepts the following options:
   #
-  #  * driver: override the default driver.
+  # * driver: override the default driver.
   #
-  #  :yields: promise
+  # :yields: promise
   #
-  #  Yields a promise into the block as the first
-  #  argument so that you can resolve or reject from
-  #  within the block.
+  # Yields a promise into the block as the first
+  # argument so that you can resolve or reject from
+  # within the block.
   #
   #    MrDarcy.promise do |p|
   #      r = rand(10)

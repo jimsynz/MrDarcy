@@ -20,7 +20,7 @@ module MrDarcy
       # Defines an action that can be performed in this
       # context.
       #
-      #  * action_name: essentially the name of the method defined in this class.
+      # * action_name: essentially the name of the method defined in this class.
       #
       # Takes a block with which to define the action.
       def action action_name, &block
