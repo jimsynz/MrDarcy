@@ -130,7 +130,7 @@ doing async ruby:
 
      ```ruby
      MrDarcy.promise do |promise|
-       accellerate_the_delorean
+       accelerate_the_delorean
        if speed >= 88
          promise.resolve :time_flux_initiated
        else
