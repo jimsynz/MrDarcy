@@ -1,6 +1,8 @@
-# A wrapper around promises that can be externally resolved.
+require 'forwardable'
 
 module MrDarcy
+
+  # A wrapper around promises that can be externally resolved.
   class Deferred
     extend Forwardable
 

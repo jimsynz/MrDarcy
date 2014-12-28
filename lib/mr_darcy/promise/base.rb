@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module MrDarcy
   module Promise
 

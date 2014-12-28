@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module MrDarcy
   module Promise
     # Syntax wrapper around Promise. Can probably be removed now.

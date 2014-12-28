@@ -1,7 +1,11 @@
+require 'forwardable'
 require 'thread'
 
 module MrDarcy
   module Promise
+
+    # A meta-promise that represents a collection of other promises and their
+    # states.
     class Collection
       include Enumerable
       extend Forwardable
